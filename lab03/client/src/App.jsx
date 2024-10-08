@@ -5,6 +5,8 @@ function App() {
   const [multipleFiles, setMultipleFiles] = useState([]);
   const [fetchedSingleFile, setFetchedSingleFile] = useState(null);
   const [fetchedMultiFiles, setFetchedMultiFiles] = useState(null);
+  const [fetchedAllFiles, setFetchedAllFiles] = useState(null);
+  const [dogUrl, setDogUrl] = useState(null);
 
   // Handle file input for single upload
   const handleSingleFileChange = (e) => {
@@ -60,6 +62,8 @@ function App() {
       const url = URL.createObjectURL(blob);
       setFetchedSingleFile(url);
       setFetchedMultiFiles(null);
+      setFetchedAllFiles(null);
+      setDogUrl(null);
     } catch (error) {
       console.error('Error fetching single file:', error);
     }
@@ -78,11 +82,45 @@ function App() {
       const urls = blobs.map((blob) => URL.createObjectURL(blob));
       setFetchedMultiFiles(urls);
       setFetchedSingleFile(null);
+      setFetchedAllFiles(null);
+      setDogUrl(null);
     } catch (error) {
       console.error('Error fetching multiple files:', error);
     }
   }
 
+  const fetchAllFiles = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/fetch/all');
+      const json = await response.json();
+      const blobs = [];
+      for(const item of json.data) {
+        let imgResponse = await fetch(`http://localhost:8000/fetch/search/${item}`);
+        let blob = await imgResponse.blob();
+        blobs.push(blob);
+      }
+      const urls = blobs.map((blob) => URL.createObjectURL(blob));
+      setFetchedAllFiles(urls);
+      setFetchedSingleFile(null);
+      setFetchedMultiFiles(null);
+      setDogUrl(null);
+    } catch (error) {
+      console.error('Error fetching all files:', error);
+    }
+  }
+
+  const fetchDogPicture = async () => {
+    try {
+      const response = await fetch('https://dog.ceo/api/breeds/image/random');
+      const json = await response.json();
+      setDogUrl(json.message);
+      setFetchedSingleFile(null);
+      setFetchedMultiFiles(null);
+      setFetchedAllFiles(null);
+    } catch (error) {
+      console.error('Error fetching dog picture:', error);
+    }
+  }
 
   return (
     <div style={{ padding: '20px' }}>
@@ -106,6 +144,8 @@ function App() {
       <div>
         <button onClick={fetchSingleFile}>Fetch Single File</button>
         <button onClick={fetchMultipleFiles}>Fetch Multiple Files</button>
+        <button onClick={fetchAllFiles}>Fetch All Files</button>
+        <button onClick={fetchDogPicture}>Fetch Dog Picture</button>
         {fetchedSingleFile && (
           <div>
             <h3>Single File</h3>
@@ -120,6 +160,22 @@ function App() {
                 <img src={image} alt="Fetched Multi" style={{ width: '200px', marginTop: '10px' }} />
               ))
             }
+          </div>
+        )}
+        {fetchedAllFiles && (
+          <div>
+            <h3>All Files</h3>
+            {
+              fetchedAllFiles.map((image) => (
+                <img src={image} alt="Fetched All" style={{ width: '200px', marginTop: '10px' }} />
+              ))
+            }
+          </div>
+        )}
+        {dogUrl && (
+          <div>
+            <h3>Dog Picture</h3>
+            <img src={dogUrl} alt="Dog Picture" style={{ width: '200px', marginTop: '10px' }} />
           </div>
         )}
       </div>
