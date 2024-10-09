@@ -54,6 +54,23 @@ function App() {
     }
   };
 
+  const uploadDogPic = async () => {
+    try {
+      const response = await fetch(dogUrl);
+      const blob = await response.blob();
+      const formData = new FormData();
+      formData.append('doggo', blob, dogUrl.split('/').pop());
+      const doggoResponse = await fetch('http://localhost:8000/save/doggo', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await doggoResponse.json();
+      alert(data.message);
+    } catch (error) {
+      console.error('Error uploading dog Picture: ', error);
+    }
+  };
+
   // Fetch a random single file from the server
   const fetchSingleFile = async () => {
     try {
@@ -123,7 +140,7 @@ function App() {
   }
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', padding: '20px', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
       <h1>File Upload and Fetch App</h1>
 
       {/* Section for uploading single file */}
@@ -176,6 +193,7 @@ function App() {
           <div>
             <h3>Dog Picture</h3>
             <img src={dogUrl} alt="Dog Picture" style={{ width: '200px', marginTop: '10px' }} />
+            <button onClick={uploadDogPic}>Upload Dog Pic</button>
           </div>
         )}
       </div>

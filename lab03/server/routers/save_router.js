@@ -18,4 +18,11 @@ router.post("/multiple", upload.array("files", 20), (req, res) => {
   res.status(200).json({message: `Files uploaded successfully: ${filePaths.join(", ")}`});
 });
 
+router.post("/doggo", upload.single('doggo'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send("No doggo uploaded.");
+  }
+  res.json({message: `Doggo uploaded successfully: ${req.file.path}`});
+})
+
 module.exports = router;
