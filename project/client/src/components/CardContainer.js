@@ -19,7 +19,7 @@ const CardContainer = ({rootRef}) => {
       <div style={{display: 'inline-flex'}}>
         {
           testCards.map((cardData) => (
-            <PlayingCard data={cardData} rootRef={rootRef}/>
+            <PlayingCard key={crypto.randomUUID()} data={cardData} rootRef={rootRef}/>
           ))
         }
       </div>

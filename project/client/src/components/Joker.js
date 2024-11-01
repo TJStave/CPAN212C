@@ -1,32 +1,28 @@
-import { Card, Spinner } from 'react-bootstrap';
-import { useState, useRef, useEffect } from 'react';
-import jimbo from '../assets/jimbo.png'
+import { useState, useEffect } from 'react';
 
-const Joker = () => {
-  const canvasRef = useRef(null);
-  const imgRef = useRef(null);
+const Joker = ({data}) => {
+  if(!Object.hasOwn(data, 'joker')){
+    data.joker = 'jimbo';
+  }
+
+  const [jokerImg, setJokerImg] = useState(null);
+  const [fetchTrigger, setFetchTrigger] = useState(false);
 
   useEffect(() => {
-    const context = canvasRef.current.getContext('2d');
-    context.drawImage(imgRef.current, 0, 0);
+    const fetchJoker = async () => {
+      const response = await fetch('http://localhost:8000/build/joker', {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      const imgURL = await response.text();
+      setJokerImg(imgURL);
+    }
+    fetchJoker();
   }, []);
 
   return(
-    <>
-      <img
-        ref={imgRef}
-        src={jimbo}
-        alt=""
-        width="142"
-        height="190"
-        style={{display: 'none'}}
-      />
-      <canvas
-        ref={canvasRef}
-        width="142"
-        height="190"
-      />
-    </>
+    <img src={jokerImg} alt="" style={{alignSelf: 'center'}}/>
   );
 }
 
