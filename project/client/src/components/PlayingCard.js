@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Spinner, Card, Button } from 'react-bootstrap';
+import { createPortal } from 'react-dom';
 import Select from 'react-dropdown-select';
+import { suitOptions, rankOptions, typeOptions, sealOptions } from './optionArrays';
 
-const PlayingCard = ({data, rootRef}) => {
+const PlayingCard = ({data, rootRef, scrollRef}) => {
   if(!Object.hasOwn(data, 'suit')){
     data.suit = 'spades';
   }
@@ -12,67 +15,59 @@ const PlayingCard = ({data, rootRef}) => {
     data.type = 'normal';
   }
 
+  const thisRef = useRef(null);
+  const infoRef = useRef(null);
+
   const [cardSuit, setCardSuit] = useState(data.suit);
   const [cardRank, setCardRank] = useState(data.rank);
   const [cardType, setCardType] = useState(data.type);
   const [cardSeal, setCardSeal] = useState(data.seal);
   const [cardImg, setCardImg] = useState(null);
+  const [infoLeft, setInfoLeft] = useState(-10000); //negative value to render offscreen until position is determined
+  const [infoTop, setInfoTop] = useState(-10000);
+  const [isLoading, setLoading] = useState(true);
   const [isHover, setHover] = useState(false);
+  const [isEditing, setEditing] = useState(false);
   const [fetchTrigger, setFetchTrigger] = useState(false);
 
-  const suitOptions = [
-    {'label': 'Hearts', 'value': 'hearts'},
-    {'label': 'Clubs', 'value': 'clubs'},
-    {'label': 'Diamonds', 'value': 'diamonds'},
-    {'label': 'Spades', 'value': 'spades'}
-  ];
-  const rankOptions = [
-    {'label': '2'},
-    {'label': '3'},
-    {'label': '4'},
-    {'label': '5'},
-    {'label': '6'},
-    {'label': '7'},
-    {'label': '8'},
-    {'label': '9'},
-    {'label': '10'},
-    {'label': 'Jack'},
-    {'label': 'Queen'},
-    {'label': 'King'},
-    {'label': 'Ace'}
-  ];
+  const findValue = (optionsArray, currentValue) => {
+    let foundOption = {};
+    for (let i = 0; i < optionsArray.length; i++) {
+      if(optionsArray[i].value === currentValue){
+        foundOption = optionsArray[i];
+        break;
+      }
+    }
+    return [foundOption];
+  }
 
-  const typeOptions = [
-    {'label': 'Standard', 'value': 'normal'},
-    {'label': 'Bonus', 'value': 'bonus'},
-    {'label': 'Mult', 'value': 'mult'},
-    {'label': 'Wild', 'value': 'wild'},
-    {'label': 'Glass', 'value': 'glass'},
-    {'label': 'Steel', 'value': 'steel'},
-    {'label': 'Stone', 'value': 'stone'},
-    {'label': 'Gold', 'value': 'gold'},
-    {'label': 'Lucky', 'value': 'lucky'}
-  ]
+  const centerElement = (parentRef, childRef, grandRef, elderRef) => {
+    let parentCenter = (parentRef.current.offsetLeft + (parentRef.current.offsetWidth / 2)) - grandRef.current.scrollLeft;
+    let childLeft = parentCenter - (childRef.current.offsetWidth / 2);
+    if (childLeft + childRef.current.offsetWidth > elderRef.current.offsetWidth){
+      childLeft = elderRef.current.offsetWidth - childRef.current.offsetWidth;
+    }
+    return childLeft
+  }
 
-  const sealOptions = [
-    {'label': 'None', 'value': null},
-    {'label': 'Gold', 'value': 'gold'},
-    {'label': 'Red', 'value': 'red'},
-    {'label': 'Blue', 'value': 'blue'},
-    {'label': 'Purple', 'value': 'purple'}
-  ]
+  const bottomElement = (parentRef, childRef) => {
+    return (parentRef.current.offsetTop - childRef.current.offsetHeight + 10);
+  }
 
   useEffect(() => {
     data.suit = cardSuit;
-    setFetchTrigger(!fetchTrigger);
+    setFetchTrigger(state => !state);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cardSuit]);
   useEffect(() => {
     data.rank = cardRank;
-    setFetchTrigger(!fetchTrigger);
+    setFetchTrigger(state => !state);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cardRank]);
   useEffect(() => {
     data.type = cardType;
-    setFetchTrigger(!fetchTrigger);
+    setFetchTrigger(state => !state);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cardType]);
   useEffect(() => {
     if (cardSeal != null){
@@ -80,7 +75,8 @@ const PlayingCard = ({data, rootRef}) => {
     } else if (cardSeal == null && data.seal != null){
       delete data.seal;
     }
-    setFetchTrigger(!fetchTrigger);
+    setFetchTrigger(state => !state);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cardSeal]);
 
   useEffect(() => {
@@ -92,51 +88,82 @@ const PlayingCard = ({data, rootRef}) => {
       });
       const imgURL = await response.text();
       setCardImg(imgURL);
+      setLoading(false);
     }
     fetchCard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchTrigger]);
 
+  useEffect(() => {
+    if(infoRef.current && thisRef.current){
+      setInfoLeft(centerElement(thisRef, infoRef, scrollRef, rootRef));
+      setInfoTop(bottomElement(thisRef, infoRef));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHover])
+
   return(
-    <div onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} style={{position: 'relative'}}>
-      <img src={cardImg} alt=""/>
-      {isHover && (
-        <>
-          <div style={{height: '100%', width:'100%', position: 'absolute', top: '0px', left: '0px', backgroundColor: '#fff', opacity: 0.5 }}/>
-          <div style={{flexDirection: 'column', width: '100%', position: 'absolute', top: '0px', left: '0px', zIndex: 3}}>
-            <Select
-              options={suitOptions}
-              onChange={(value) => setCardSuit(value[0].value)}
-              searchable='false'
-              portal={rootRef.current}
-              placeholder='Suit'
-            />
-            <Select
-              options={rankOptions}
-              onChange={(value) => setCardRank(value[0].label)}
-              valueField='label'
-              searchable='false'
-              portal={rootRef.current}
-              placeholder='Rank'
-            />
-            <Select
-              options={typeOptions}
-              onChange={(value) => setCardType(value[0].value)}
-              searchable='false'
-              portal={rootRef.current}
-              placeholder='Enhancement'
-            />
-            <Select
-              options={sealOptions}
-              onChange={(value) => setCardSeal(value[0].value)}
-              valueField='label'
-              searchable='false'
-              portal={rootRef.current}
-              placeholder='Seal'
-            />
-          </div>
-        </>
-      )}
-    </div>
+    isLoading ? <Spinner /> : (
+      <div ref={thisRef} onMouseEnter={() => setHover(true)} onMouseLeave={() => {setHover(false); setEditing(false)}}>
+        <img src={cardImg} alt=""/>
+        {isHover && createPortal(
+          <Card ref={infoRef} bg='primary' text='light'
+            style={{width: '180px', position: 'absolute', left: infoLeft, top: infoTop}}>
+            {!isEditing ? (
+              <>
+                {cardType !== 'stone' && (
+                  <Card.Header>
+                    {cardRank} of {cardSuit.charAt(0).toUpperCase() + cardSuit.slice(1)}
+                  </Card.Header>
+                )}
+                <Button onClick={() => {setEditing(true); setInfoTop(currentValue => currentValue - 80)}}>Edit Card</Button>
+              </>
+            ) : (
+              <Card.Body>
+                <Select
+                  options={suitOptions}
+                  values={findValue(suitOptions, cardSuit)}
+                  onChange={(value) => setCardSuit(value[0].value)}
+                  searchable='false'
+                  placeholder='Suit'
+                  dropdownHeight='200px'
+                  style={{color: 'black'}}
+                />
+                <Select
+                  options={rankOptions}
+                  values={[{'label': cardRank}]}
+                  onChange={(value) => setCardRank(value[0].label)}
+                  valueField='label'
+                  searchable='false'
+                  placeholder='Rank'
+                  dropdownHeight='200px'
+                  style={{color: 'black'}}
+                />
+                <Select
+                  options={typeOptions}
+                  values={findValue(typeOptions, cardType)}
+                  onChange={(value) => setCardType(value[0].value)}
+                  searchable='false'
+                  placeholder='Enhancement'
+                  dropdownHeight='200px'
+                  style={{color: 'black'}}
+                />
+                <Select
+                  options={sealOptions}
+                  values={findValue(sealOptions, cardSeal)}
+                  onChange={(value) => setCardSeal(value[0].value)}
+                  valueField='label'
+                  searchable='false'
+                  placeholder='Seal'
+                  dropdownHeight='200px'
+                  style={{color: 'black'}}
+                />
+              </Card.Body>
+            )}
+          </Card>, rootRef.current
+        )}
+      </div>
+    )
   );
 }
 

@@ -1,21 +1,15 @@
+import { useRef } from "react";
 import Joker from "./Joker";
 
-const JokerContainer = () => {
-  const testJokers = [
-    {'joker': 'halfJoker', 'lifespan': 'perishable'},
-    {'joker': 'steelJoker', 'lifespan': 'eternal'},
-    {'joker': 'weeJoker', 'lifespan': 'eternal', 'debuff': 'rental'},
-    {'joker': 'photograph', 'debuff': 'rental'},
-    {'joker': 'squareJoker'},
-    {}
-  ]
+const JokerContainer = ({rootRef, jokers}) => {
+  const containerRef = useRef(null);
 
   return(
-    <div style={{flexDirection: 'row', flexWrap: 'nowrap', overflowX: 'auto'}}>
+    <div ref={containerRef} style={{flexDirection: 'row', flexWrap: 'nowrap', overflowX: 'auto'}}>
       <div style={{display: 'inline-flex'}}>
         {
-          testJokers.map((jokerData) => (
-            <Joker key={crypto.randomUUID()} data={jokerData}/>
+          jokers.map((jokerData) => (
+            <Joker key={jokerData.key} data={jokerData} rootRef={rootRef} scrollRef={containerRef}/>
           ))
         }
       </div>
