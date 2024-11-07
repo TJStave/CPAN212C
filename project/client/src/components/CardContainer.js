@@ -6,6 +6,7 @@ import clamp from 'lodash/clamp';
 const CardContainer = ({rootRef, cards}) => {
   const containerRef = useRef(null);
 
+  const [numSelected, setNumSelected] = useState(0);
   const [sortTrigger, setSortTrigger] = useState(null);
 
   const suitOrder = [
@@ -42,6 +43,7 @@ const CardContainer = ({rootRef, cards}) => {
   const moveCard = (index, direction) => {
     //apparently this is an ES6 feature
     [cards[index], cards[clamp(index + direction, 0, cards.length - 1)]] = [cards[clamp(index + direction, 0, cards.length - 1)], cards[index]];
+    setSortTrigger({...sortTrigger});
   }
 
   const createCard = (card) => {
@@ -51,10 +53,10 @@ const CardContainer = ({rootRef, cards}) => {
   return(
     <div>
       <div ref={containerRef} style={{flexDirection: 'row', flexWrap: 'nowrap', overflowX: 'auto'}}>
-        <div style={{display: 'inline-flex'}}>
+        <div style={{display: 'inline-flex', height: 300}}>
           {
             cards.map((cardData, cardIndex) => (
-              <PlayingCard key={cardData.key} index={cardIndex} numCards={cards.length} data={cardData} move={moveCard} rootRef={rootRef} scrollRef={containerRef}/>
+              <PlayingCard key={cardData.key} index={cardIndex} numCards={cards.length} data={cardData} cardsSelected={[numSelected, setNumSelected]} move={moveCard} rootRef={rootRef} scrollRef={containerRef}/>
             ))
           }
         </div>

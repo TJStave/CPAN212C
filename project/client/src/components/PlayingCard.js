@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import Select from 'react-dropdown-select';
 import { suitOptions, rankOptions, typeOptions, sealOptions } from './optionArrays';
 
-const PlayingCard = ({data, rootRef, scrollRef}) => {
+const PlayingCard = ({index, data, cardsSelected: [numSelected, setNumSelected], move, rootRef, scrollRef}) => {
   if(!Object.hasOwn(data, 'suit')){
     data.suit = 'spades';
   }
@@ -27,6 +27,7 @@ const PlayingCard = ({data, rootRef, scrollRef}) => {
   const [infoTop, setInfoTop] = useState(-10000);
   const [isLoading, setLoading] = useState(true);
   const [isHover, setHover] = useState(false);
+  const [isSelected, setSelected] = useState(false);
   const [isEditing, setEditing] = useState(false);
   const [fetchTrigger, setFetchTrigger] = useState(false);
 
@@ -54,6 +55,20 @@ const PlayingCard = ({data, rootRef, scrollRef}) => {
     return (parentRef.current.offsetTop - childRef.current.offsetHeight + 10);
   }
 
+  const selectCard = () => {
+    if (isSelected){
+      setSelected(false);
+      setNumSelected(num => num - 1);
+      if(Object.hasOwn(data, 'selected')){
+        delete data.selected;
+      }
+    } else if(numSelected < 5){
+      setSelected(true);
+      setNumSelected(num => num + 1);
+      data.selected = true;
+    }
+  }
+
   useEffect(() => {
     data.suit = cardSuit;
     setFetchTrigger(state => !state);
@@ -72,7 +87,7 @@ const PlayingCard = ({data, rootRef, scrollRef}) => {
   useEffect(() => {
     if (cardSeal != null){
       data.seal = cardSeal;
-    } else if (cardSeal == null && data.seal != null){
+    } else if (cardSeal == null && Object.hasOwn(data, 'seal')){
       delete data.seal;
     }
     setFetchTrigger(state => !state);
@@ -100,12 +115,12 @@ const PlayingCard = ({data, rootRef, scrollRef}) => {
       setInfoTop(bottomElement(thisRef, infoRef));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isHover])
+  }, [isHover, isSelected])
 
   return(
     isLoading ? <Spinner /> : (
-      <div ref={thisRef} onMouseEnter={() => setHover(true)} onMouseLeave={() => {setHover(false); setEditing(false)}}>
-        <img src={cardImg} alt=""/>
+      <div ref={thisRef} onMouseEnter={() => setHover(true)} onMouseLeave={() => {setHover(false); setEditing(false)}} style={{alignSelf: isSelected ? 'flex-start' : 'flex-end'}}>
+        <img src={cardImg} onClick={selectCard} alt=""/>
         {isHover && createPortal(
           <Card ref={infoRef} bg='primary' text='light'
             style={{width: '180px', position: 'absolute', left: infoLeft, top: infoTop}}>
@@ -117,6 +132,7 @@ const PlayingCard = ({data, rootRef, scrollRef}) => {
                   </Card.Header>
                 )}
                 <Button onClick={() => {setEditing(true); setInfoTop(currentValue => currentValue - 80)}}>Edit Card</Button>
+                <Button onClick={() => move(index, -1)}>&lt;--</Button><Button onClick={() => move(index, 1)}>--&gt;</Button>
               </>
             ) : (
               <Card.Body>

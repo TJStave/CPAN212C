@@ -1,3 +1,4 @@
+require("dotenv").config();
 const PORT = process.env.PORT || 8000;
 const express = require("express");
 const app = express();
@@ -8,8 +9,10 @@ app.use(express.json());
 app.use(cors());
 
 const layerCake = require('./routers/layerCake.js');
+const judge = require('./routers/judge.js');
 
 app.use('/build', layerCake);
+app.use('/score', judge);
 
 app.get("/", (req, res) => {
   res.send("You shouldn't be here.");

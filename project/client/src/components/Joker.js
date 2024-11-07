@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import Select from 'react-dropdown-select';
 import { jokerOptions, lifespanOptions, debuffOptions } from './optionArrays';
 
-const Joker = ({data, rootRef, scrollRef}) => {
+const Joker = ({index, data, move, rootRef, scrollRef}) => {
   if(!Object.hasOwn(data, 'joker')){
     data.joker = 'jimbo';
   }
@@ -91,6 +91,7 @@ const Joker = ({data, rootRef, scrollRef}) => {
       setInfoLeft(centerElement(thisRef, infoRef, scrollRef, rootRef));
       setInfoTop(bottomElement(thisRef));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isHover])
 
   return(
@@ -104,6 +105,7 @@ const Joker = ({data, rootRef, scrollRef}) => {
               <>
                 <Card.Header>{findValue(jokerOptions, whichJoker)[0].label}</Card.Header>
                 <Button onClick={() => {setEditing(true); setInfoTop(currentValue => currentValue)}}>Edit Card</Button>
+                <Button onClick={() => move(index, -1)}>&lt;--</Button><Button onClick={() => move(index, 1)}>--&gt;</Button>
               </>
             ) : (
               <Card.Body>

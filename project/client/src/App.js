@@ -1,4 +1,5 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+import { Button } from 'react-bootstrap';
 import './App.css';
 import CardContainer from './components/CardContainer';
 import JokerContainer from './components/JokerContainer';
@@ -11,7 +12,7 @@ function App() {
     {'joker': 'weeJoker', 'lifespan': 'eternal', 'debuff': 'rental', 'key': crypto.randomUUID()},
     {'joker': 'photograph', 'debuff': 'rental', 'key': crypto.randomUUID()},
     {'joker': 'squareJoker', 'key': crypto.randomUUID()}
-  ]
+  ];
   const testCards = [
     {'type': 'stone', 'seal': 'gold', 'key': crypto.randomUUID()},
     {'suit': 'diamonds', 'rank': 'Jack', 'type': 'gold', 'seal': 'blue', 'key': crypto.randomUUID()},
@@ -22,8 +23,11 @@ function App() {
     {'suit': 'clubs', 'rank': 'King', 'type': 'mult', 'key': crypto.randomUUID()},
     {'suit': 'diamonds', 'rank': '2', 'type': 'wild', 'key': crypto.randomUUID()},
     {'suit': 'spades', 'rank': '10', 'type': 'bonus', 'key': crypto.randomUUID()}
-  ]
+  ];
 
+  const jokers = testJokers;
+  const cards = testCards;
+  const statusState = {'hands': 4, 'discards': 3, 'money': 4};
   /*
   This ref is part of a hacky workaround that is only necessary 
   because of how browsers treat overflow when it has different values on x and y
@@ -32,14 +36,33 @@ function App() {
   */
   const appRef = useRef();
 
+  const [score, setScore] = useState(0);
+
+  const calcScore = async () => {
+    const selectedCards = [];
+    const unSelectedCards = [];
+    for(const i in cards){
+      if (cards[i].selected)
+        selectedCards[selectedCards.length] = cards[i];
+      else
+        unSelectedCards[unSelectedCards.length] = cards[i];
+    }
+    const response = await fetch('http://localhost:8000/score', {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({'jokers': jokers, 'hand': selectedCards, 'cards': unSelectedCards, 'state': statusState})
+      });
+  }
+
   return (
     <div className="App" ref={appRef} style={{flex: 1, flexDirection: 'row', alignItems: 'stretch'}}>
-      <div style={{display: 'flex', width: '20vw', alignItems: 'stretch'}}>
-        <StatusBar/>
+      <div style={{display: 'flex', width: '20vw', flexDirection: 'column', justifyContent: 'center'}}>
+        <StatusBar state={statusState} score={score}/>
+        <Button onClick={calcScore}>Score</Button>
       </div>
       <div style={{display: 'flex', width: '80vw', flexDirection: 'column', justifyContent: 'space-between'}}>
-        <JokerContainer rootRef={appRef} jokers={testJokers}/>
-        <CardContainer rootRef={appRef} cards={testCards}/>
+        <JokerContainer rootRef={appRef} jokers={jokers}/>
+        <CardContainer rootRef={appRef} cards={cards}/>
       </div>
     </div>
   );
