@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import Select from 'react-dropdown-select';
 import { suitOptions, rankOptions, typeOptions, sealOptions } from './optionArrays';
 
-const PlayingCard = ({index, data, cardsSelected: [numSelected, setNumSelected], move, rootRef, scrollRef}) => {
+const PlayingCard = ({index, data, cardsSelected: [numSelected, setNumSelected], move, remove, rootRef, scrollRef}) => {
   if(!Object.hasOwn(data, 'suit')){
     data.suit = 'spades';
   }
@@ -174,6 +174,7 @@ const PlayingCard = ({index, data, cardsSelected: [numSelected, setNumSelected],
                   dropdownHeight='200px'
                   style={{color: 'black'}}
                 />
+                <Button variant='danger' onClick={() => remove(index)}>Delete Card</Button>
               </Card.Body>
             )}
           </Card>, rootRef.current

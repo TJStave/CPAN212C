@@ -2,6 +2,7 @@ import { Button } from "react-bootstrap";
 import PlayingCard from "./PlayingCard";
 import { useRef, useState } from "react";
 import clamp from 'lodash/clamp';
+import AddCard from "./AddCard";
 
 const CardContainer = ({rootRef, cards}) => {
   const containerRef = useRef(null);
@@ -48,6 +49,12 @@ const CardContainer = ({rootRef, cards}) => {
 
   const createCard = (card) => {
     cards[cards.length] = card;
+    setSortTrigger({...sortTrigger});
+  }
+
+  const deleteCard = (index) => {
+    cards.splice(index, 1);
+    setSortTrigger({...sortTrigger});
   }
 
   return(
@@ -56,9 +63,10 @@ const CardContainer = ({rootRef, cards}) => {
         <div style={{display: 'inline-flex', height: 300}}>
           {
             cards.map((cardData, cardIndex) => (
-              <PlayingCard key={cardData.key} index={cardIndex} numCards={cards.length} data={cardData} cardsSelected={[numSelected, setNumSelected]} move={moveCard} rootRef={rootRef} scrollRef={containerRef}/>
+              <PlayingCard key={cardData.key} index={cardIndex} numCards={cards.length} data={cardData} cardsSelected={[numSelected, setNumSelected]} move={moveCard} remove={deleteCard} rootRef={rootRef} scrollRef={containerRef}/>
             ))
           }
+          <AddCard add={createCard} rootRef={rootRef} scrollRef={containerRef}/>
         </div>
       </div>
       <Button onClick={() => sortCards()}>Sort</Button>

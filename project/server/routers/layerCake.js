@@ -1,6 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const {createCanvas, loadImage } = require('canvas');
+const path = require('path');
+
+router.get('/newCard', (req, res) => {
+  res.sendFile(path.join(__dirname, '../assets/newCard.png'));
+})
 
 router.post('/card', async (req, res) => {
   let canvas = createCanvas(142, 190);

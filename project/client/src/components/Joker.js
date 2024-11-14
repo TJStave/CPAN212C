@@ -16,6 +16,10 @@ const Joker = ({index, data, move, rootRef, scrollRef}) => {
   const [jokerLifespan, setJokerLifespan] = useState(data.lifespan);
   const [jokerDebuff, setJokerDebuff] = useState(data.debuff);
   const [jokerImg, setJokerImg] = useState(null);
+  const [jokerName, setJokerName] = useState('');
+  const [jokerDesc, setJokerDesc] = useState('');
+  const [jokerRarity, setJokerRarity] = useState('');
+  const [jokerValue, setJokerValue] = useState(0);
   const [infoLeft, setInfoLeft] = useState(-10000); //negative value to render offscreen until position is determined
   const [infoTop, setInfoTop] = useState(-10000);
   const [isLoading, setLoading] = useState(true);
@@ -72,7 +76,7 @@ const Joker = ({index, data, move, rootRef, scrollRef}) => {
   }, [jokerDebuff]);
 
   useEffect(() => {
-    const fetchJoker = async () => {
+    const fetchJokerImg = async () => {
       let response = await fetch('http://localhost:8000/build/joker', {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
@@ -82,7 +86,21 @@ const Joker = ({index, data, move, rootRef, scrollRef}) => {
       setJokerImg(imgURL);
       setLoading(false);
     }
-    fetchJoker();
+    const fetchJokerInfo = async () => {
+      let response = await fetch('http://localhost:8000/query', {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({'joker': data.joker})
+      });
+      let json = await response.json();
+      data.info = {'name': json.name, 'description': json.description, 'rarity': json.rarity, 'value': json.value, 'implemented': json.implemented};
+      setJokerName(data.info.name);
+      setJokerDesc(data.info.description);
+      setJokerRarity(data.info.rarity);
+      setJokerValue(data.info.value);
+    }
+    fetchJokerImg();
+    fetchJokerInfo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchTrigger]);
 
@@ -103,7 +121,7 @@ const Joker = ({index, data, move, rootRef, scrollRef}) => {
             style={{width: '180px', position: 'absolute', left: infoLeft, top: infoTop}}>
             {!isEditing ? (
               <>
-                <Card.Header>{findValue(jokerOptions, whichJoker)[0].label}</Card.Header>
+                <Card.Header>{jokerName}</Card.Header>
                 <Button onClick={() => {setEditing(true); setInfoTop(currentValue => currentValue)}}>Edit Card</Button>
                 <Button onClick={() => move(index, -1)}>&lt;--</Button><Button onClick={() => move(index, 1)}>--&gt;</Button>
               </>
