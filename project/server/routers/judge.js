@@ -18,9 +18,13 @@ const rankOrder = [
 ];
 //Please don't pay too much attention to this, it's not related to the implementation of the classwork and it's super messy
 router.post("/", (req, res) => {
-  let hasFourFingers = false;
-  let hasShortcut = false;
-  let hasSmearedJoker = false;
+  const jokerMods = {
+    'hasFourFingers': false,
+    'hasShortcut': false,
+    'hasSmearedJoker': false,
+    'hasSplash': false,
+    'hasPareidolia': false
+  }
   const numSuits = {
     'wilds': 0,
     'reds': 0,
@@ -54,64 +58,137 @@ router.post("/", (req, res) => {
     'has2Pair': false,
     'hasPair': false,
   }
+  const handKeys = {
+    'keysFlush': [],
+    'keysStraight': [],
+    'keys5oak': [],
+    'keys4oak': [],
+    'keys3oak': [],
+    'keys2Pair': [],
+    'keysPair': [],
+    'keyHighCard': []
+  }
+
   const hand = req.body.hand;
-  const sortedHand = hand.toSorted((a, b) => {return (b.type === 'stone' ? -1 : rankOrder.indexOf(b.rank))
+  let sortedHand = hand.toSorted((a, b) => {return (b.type === 'stone' ? -1 : rankOrder.indexOf(b.rank))
     - (a.type === 'stone' ? -1 : rankOrder.indexOf(a.rank))});
   for (const i in sortedHand){
     if(sortedHand[i].type === 'stone'){
       delete sortedHand[i];
     }
   }
-  let numInARow = 1;
-  let maxInARow = 1;
-  let prevRank = null;
-  for(const i in sortedHand){
-    if(i != 0){
-      if(rankOrder.indexOf(sortedHand[i].rank) + 1 === rankOrder.indexOf(prevRank)
-        || (hasShortcut && ((rankOrder.indexOf(sortedHand[i].rank) + 2 === rankOrder.indexOf(prevRank))))){
-          numInARow += 1;
-          maxInARow = Math.max(numInARow, maxInARow);
-      } else if(sortedHand[i].rank !== prevRank){
-        numInARow = 1;
+  if (sortedHand.length !== 0){
+    handKeys.keyHighCard[0] = sortedHand[0].key;
+
+    let numInARow = 1;
+    let maxInARow = numInARow;
+    let prevRank = null;
+    let tempStraightKeys = [sortedHand[0].key];
+    let maxStraightKeys = tempStraightKeys;
+    for(const i in sortedHand){
+      //This mess of code identifies straights
+      if(i != 0){
+        if(rankOrder.indexOf(sortedHand[i].rank) + 1 === rankOrder.indexOf(prevRank)
+          || (jokerMods.hasShortcut && ((rankOrder.indexOf(sortedHand[i].rank) + 2 === rankOrder.indexOf(prevRank))))){
+            numInARow += 1;
+            tempStraightKeys[tempStraightKeys.length] = sortedHand[i].key;
+            maxInARow = Math.max(numInARow, maxInARow);
+            if(tempStraightKeys.length > maxStraightKeys.length)
+              maxStraightKeys = tempStraightKeys;
+        } else if(sortedHand[i].rank !== prevRank){
+          numInARow = 1;
+          tempStraightKeys = [sortedHand[i].key];
+        }
+      }
+      prevRank = sortedHand[i].rank;
+      //count the number of card in each ranks to identify pairs and num of a kind
+      numRanks[sortedHand[i].rank] += 1;
+      //count the number of cards in each suit to identify flushes
+      if(sortedHand[i].type === 'wild'){
+        numSuits.wilds += 1;
+      } else if(jokerMods.hasSmearedJoker && (sortedHand[i].suit === 'hearts' || sortedHand[i].suit === 'diamonds')){
+        numSuits.reds += 1;
+      } else if(jokerMods.hasSmearedJoker && (sortedHand[i].suit === 'spades' || sortedHand[i].suit === 'clubs')){
+        numSuits.blacks += 1;
+      } else{
+        numSuits[sortedHand[i].suit] += 1;
       }
     }
-    prevRank = sortedHand[i].rank;
-    numRanks[sortedHand[i].rank] += 1;
-    if(sortedHand[i].type === 'wild'){
-      numSuits.wilds += 1;
-    } else if(hasSmearedJoker && (sortedHand[i].suit === 'hearts' || sortedHand[i].suit === 'diamonds')){
-      numSuits.reds += 1;
-    } else if(hasSmearedJoker && (sortedHand[i].suit === 'spades' || sortedHand[i].suit === 'clubs')){
-      numSuits.blacks += 1;
-    } else{
-      numSuits[sortedHand[i].suit] += 1;
+    //This code is for the edge case of Aces in low straights, since an Ace can also count as a 1
+    if((numInARow > 1 && (sortedHand[sortedHand.length - 1].rank === '2' && sortedHand[0].rank === 'Ace')
+      || (jokerMods.hasShortcut && sortedHand[sortedHand.length - 1].rank === '3' && sortedHand[0].rank === 'Ace'))){
+        numInARow += 1;
+        tempStraightKeys[tempStraightKeys.length] = sortedHand[0].key;
+        maxInARow = Math.max(numInARow, maxInARow);
+        if(tempStraightKeys.length > maxStraightKeys.length)
+          maxStraightKeys = tempStraightKeys;
     }
-  }
-  if((numInARow > 1 && (sortedHand[sortedHand.length - 1].rank === '2' && sortedHand[0].rank === 'Ace')
-    || (hasShortcut && sortedHand[sortedHand.length - 1].rank === '3' && sortedHand[0].rank === 'Ace'))){
-      numInARow += 1;
-      maxInARow = Math.max(numInARow, maxInARow);
-  }
-  for(const suit in numSuits){
-    if(suit === 'wilds')
-      continue;
-    if(numSuits[suit] + numSuits.wilds >= (hasFourFingers ? 4 : 5))
-      handContains.hasFlush = true;
-  }
-  if(maxInARow >= (hasFourFingers ? 4 : 5))
-    handContains.hasStraight = true;
-  for(const rank in numRanks){
-    if(numRanks[rank] >= 5)
-      handContains.has5oak = true;
-    if(numRanks[rank] >= 4)
-      handContains.has4oak = true;
-    if(numRanks[rank] >= 3)
-      handContains.has3oak = true;
-    if(numRanks[rank] >= 2){
-      if(handContains.hasPair)
-        handContains.has2Pair = true;
-      else
-        handContains.hasPair = true;
+    //flush identification code
+    for(const suit in numSuits){
+      if(suit === 'wilds')
+        continue;
+      if(numSuits[suit] + numSuits.wilds >= (jokerMods.hasFourFingers ? 4 : 5)){
+        handContains.hasFlush = true;
+        for(const i in sortedHand){
+          if(sortedHand[i].type === 'wild'){
+            handKeys.keysFlush[handKeys.keysFlush.length] = sortedHand[i].key;
+          } else if(jokerMods.hasSmearedJoker && suit === 'reds' && (sortedHand[i].suit === 'hearts' || sortedHand[i].suit === 'diamonds')){
+            handKeys.keysFlush[handKeys.keysFlush.length] = sortedHand[i].key;
+          } else if(jokerMods.hasSmearedJoker && suit === 'blacks' && (sortedHand[i].suit === 'spades' || sortedHand[i].suit === 'clubs')){
+            handKeys.keysFlush[handKeys.keysFlush.length] = sortedHand[i].key;
+          } else if(sortedHand[i].suit === suit){
+            handKeys.keysFlush[handKeys.keysFlush.length] = sortedHand[i].key;
+          }
+        }
+      }
+    }
+    if(maxInARow >= (jokerMods.hasFourFingers ? 4 : 5)){
+      handContains.hasStraight = true;
+      handKeys.keysStraight = maxStraightKeys;
+    }
+    for(const rank in numRanks){
+      if(numRanks[rank] >= 5){
+        handContains.has5oak = true;
+        for(const i in sortedHand){
+          if(sortedHand[i].rank === rank){
+            handKeys.keys5oak[handKeys.keys5oak.length] = sortedHand[i].key;
+          }
+        }
+      }
+      if(numRanks[rank] >= 4){
+        handContains.has4oak = true;
+        for(const i in sortedHand){
+          if(sortedHand[i].rank === rank){
+            handKeys.keys4oak[handKeys.keys4oak.length] = sortedHand[i].key;
+          }
+        }
+      }
+      if(numRanks[rank] >= 3){
+        handContains.has3oak = true;
+        for(const i in sortedHand){
+          if(sortedHand[i].rank === rank){
+            handKeys.keys3oak[handKeys.keys3oak.length] = sortedHand[i].key;
+          }
+        }
+      }
+      if(numRanks[rank] >= 2){
+        if(handContains.hasPair){
+          handContains.has2Pair = true;
+          handKeys.keys2Pair = handKeys.keysPair;
+          for(const i in sortedHand){
+            if(sortedHand[i].rank === rank){
+              handKeys.keys2Pair[handKeys.keys2Pair.length] = sortedHand[i].key;
+            }
+          }
+        } else{
+          handContains.hasPair = true;
+          for(const i in sortedHand){
+            if(sortedHand[i].rank === rank){
+              handKeys.keysPair[handKeys.keysPair.length] = sortedHand[i].key;
+            }
+          }
+        }
+      }
     }
   }
   console.log(handContains);

@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import Select from 'react-dropdown-select';
 import { jokerOptions, lifespanOptions, debuffOptions } from './optionArrays';
 
-const Joker = ({index, data, move, rootRef, scrollRef}) => {
+const Joker = ({index, data, move, remove, rootRef, scrollRef}) => {
   if(!Object.hasOwn(data, 'joker')){
     data.joker = 'jimbo';
   }
@@ -52,6 +52,8 @@ const Joker = ({index, data, move, rootRef, scrollRef}) => {
   }
 
   useEffect(() => {
+    if(!whichJoker)
+      return;
     data.joker = whichJoker;
     setFetchTrigger(state => !state);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -114,7 +116,14 @@ const Joker = ({index, data, move, rootRef, scrollRef}) => {
 
   return(
     isLoading ? <Spinner /> : (
-      <div ref={thisRef} onMouseEnter={() => setHover(true)} onMouseLeave={() => {setHover(false); setEditing(false)}} style={{alignSelf: 'center'}}>
+      <div ref={thisRef} onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => {
+        setHover(false);
+        setEditing(false);
+        if(!whichJoker)
+          setWhichJoker(data.joker);
+      }}
+      style={{alignSelf: 'center'}}>
         <img src={jokerImg} alt="" style={{alignSelf: 'center'}}/>
         {isHover && createPortal(
           <Card ref={infoRef} bg='primary' text='light'
@@ -130,7 +139,12 @@ const Joker = ({index, data, move, rootRef, scrollRef}) => {
                 <Select
                   options={jokerOptions}
                   values={findValue(jokerOptions, whichJoker)}
-                  onChange={(value) => setWhichJoker(value[0].value)}
+                  onChange={(value) => {
+                    if(value[0])
+                      setWhichJoker(value[0].value);
+                    else
+                      setWhichJoker(null);
+                  }}
                   placeholder='Select Joker...'
                   dropdownHeight='200px'
                   style={{color: 'black'}}
@@ -155,6 +169,7 @@ const Joker = ({index, data, move, rootRef, scrollRef}) => {
                   dropdownHeight='200px'
                   style={{color: 'black'}}
                 />
+                <Button variant='danger' onClick={() => remove(index)}>Delete Joker</Button>
               </Card.Body>
             )
             }
