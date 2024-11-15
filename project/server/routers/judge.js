@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const uniq = require('lodash/uniq');
 
 const rankOrder = [
   '2',
@@ -190,6 +191,33 @@ router.post("/", (req, res) => {
         }
       }
     }
+  }
+  const pokerHands = [
+    {'ref': 'flushFive', 'name': 'Flush Five', 'qualifies': handContains.hasFlush && handContains.has5oak, 'scoringKeys': uniq(handKeys.keysFlush.concat(handKeys.keys5oak))},
+    {'ref': 'flushHouse', 'name': 'Flush House', 'qualifies': handContains.hasFlush && handContains.has3oak && handContains.has2Pair, 'scoringKeys': uniq(handKeys.keysFlush.concat(handKeys.keys3oak, handKeys.keys2Pair))},
+    {'ref': 'fiveOfAKind', 'name': 'Five of a Kind', 'qualifies': handContains.has5oak, 'scoringKeys': uniq(handKeys.keys5oak)},
+    {'ref': 'straightFlush', 'name': 'Straight Flush', 'qualifies': handContains.hasStraight && handContains.hasFlush, 'scoringKeys': uniq(handKeys.keysStraight.concat(handKeys.keysFlush))},
+    {'ref': 'fourOfAKind', 'name': 'Four of a Kind', 'qualifies': handContains.has4oak, 'scoringKeys': uniq(handKeys.keys4oak)},
+    {'ref': 'fullHouse', 'name': 'Full House', 'qualifies': handContains.has3oak && handContains.has2Pair, 'scoringKeys': uniq(handKeys.keys3oak.concat(handKeys.keys2Pair))},
+    {'ref': 'flush', 'name': 'Flush', 'qualifies': handContains.hasFlush, 'scoringKeys': uniq(handKeys.keysFlush)},
+    {'ref': 'straight', 'name': 'Straight', 'qualifies': handContains.hasStraight, 'scoringKeys': uniq(handKeys.keysStraight)},
+    {'ref': 'threeOfAKind', 'name': 'Three of a Kind', 'qualifies': handContains.has3oak, 'scoringKeys': uniq(handKeys.keys3oak)},
+    {'ref': 'twoPair', 'name': 'Two Pair', 'qualifies': handContains.has2Pair, 'scoringKeys': uniq(handKeys.keys2Pair)},
+    {'ref': 'pair', 'name': 'Pair', 'qualifies': handContains.hasPair, 'scoringKeys': uniq(handKeys.keysPair)},
+    {'ref': 'highCard', 'name': 'High Card', 'qualifies': true, 'scoringKeys': handKeys.keyHighCard},
+  ]
+  const scoringKeys = [];
+  let handName;
+  for (let handType of pokerHands){
+    if (handType.qualifies){
+      handName = handType.name;
+      scoringKeys = handType.scoringKeys;
+      break;
+    }
+  }
+  for (let i in hand){
+    if(hand[i].type === 'stone');
+    scoringKeys[scoringKeys.length] = hand[i].key;
   }
   console.log(handContains);
   res.send();
