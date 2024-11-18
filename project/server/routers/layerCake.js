@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {createCanvas, loadImage } = require('canvas');
 const path = require('path');
+const fs = require('fs');
 
 router.get('/newCard', (req, res) => {
   res.sendFile(path.join(__dirname, '../assets/newCard.png'));
@@ -53,6 +54,15 @@ router.post('/joker', async (req, res) => {
   if(req.body.debuff){
     let debuffImg = await loadImage('./assets/jokerStickers/' + req.body.debuff + 'Sticker.png');
     ctx.drawImage(debuffImg, 0, 0);
+  }
+  let exists;
+  fs.access('./jokerCode/' + req.body.joker + '.js', fs.constants.F_OK, (err) => {
+    if(!err)
+      exists = true;
+  })
+  if(!exists){
+    let noImpImg = await loadImage('./assets/noImplementation.png');
+    ctx.drawImage(noImpImg, 0, 0);
   }
   res.send(canvas.toDataURL());
 });

@@ -28,6 +28,7 @@ function App() {
   const jokers = testJokers;
   const cards = testCards;
   const statusState = {'hands': 4, 'discards': 3, 'money': 4};
+  const scoreResults = {'handSetter': () => {return undefined}, 'scoreSetter': () => {return undefined}};
   /*
   This ref is part of a hacky workaround that is only necessary 
   because of how browsers treat overflow when it has different values on x and y
@@ -35,8 +36,6 @@ function App() {
   the browser decides you're a dumbass and changes the visible one to auto
   */
   const appRef = useRef();
-
-  const [score, setScore] = useState(0);
 
   const calcScore = async () => {
     const selectedCards = [];
@@ -52,12 +51,15 @@ function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({'jokers': jokers, 'hand': selectedCards, 'cards': unSelectedCards, 'state': statusState})
       });
+    let json = await response.json();
+    scoreResults.handSetter(json.scoredHand);
+    console.log(json.scoringCardsDebug);
   }
 
   return (
     <div className="App" ref={appRef} style={{flex: 1, flexDirection: 'row', alignItems: 'stretch'}}>
       <div style={{display: 'flex', width: '20vw', flexDirection: 'column', justifyContent: 'center'}}>
-        <StatusBar state={statusState} score={score}/>
+        <StatusBar state={statusState} results={scoreResults}/>
         <Button onClick={calcScore}>Score</Button>
       </div>
       <div style={{display: 'flex', width: '80vw', flexDirection: 'column', justifyContent: 'space-between'}}>

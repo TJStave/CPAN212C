@@ -69,6 +69,20 @@ router.post("/", (req, res) => {
     'keysPair': [],
     'keyHighCard': []
   }
+  const pokerHands = {
+    'flushFive': {'name': 'Flush Five', 'baseScore': {'chips': 160, 'mult': 16}, 'scaling': {'chips': 50, 'mult': 3}},
+    'flushHouse': {'name': 'Flush House', 'baseScore': {'chips': 140, 'mult': 14}, 'scaling': {'chips': 40, 'mult': 4}},
+    'fiveOfAKind': {'name': 'Five of a Kind', 'baseScore': {'chips': 120, 'mult': 12}, 'scaling': {'chips': 35, 'mult': 3}},
+    'straightFlush': {'name': 'Straight Flush', 'baseScore': {'chips': 100, 'mult': 8}, 'scaling': {'chips': 40, 'mult': 4}},
+    'fourOfAKind': {'name': 'Four of a Kind', 'baseScore': {'chips': 60, 'mult': 7}, 'scaling': {'chips': 30, 'mult': 3}},
+    'fullHouse': {'name': 'Full House', 'baseScore': {'chips': 40, 'mult': 4}, 'scaling': {'chips': 25, 'mult': 2}},
+    'flush': {'name': 'Flush', 'baseScore': {'chips': 35, 'mult': 4}, 'scaling': {'chips': 15, 'mult': 2}},
+    'straight': {'name': 'Straight', 'baseScore': {'chips': 30, 'mult': 4}, 'scaling': {'chips': 30, 'mult': 3}},
+    'threeOfAKind': {'name': 'Three of a Kind', 'baseScore': {'chips': 30, 'mult': 3}, 'scaling': {'chips': 20, 'mult': 2}},
+    'twoPair': {'name': 'Two Pair', 'baseScore': {'chips': 20, 'mult': 2}, 'scaling': {'chips': 20, 'mult': 1}},
+    'pair': {'name': 'Pair', 'baseScore': {'chips': 10, 'mult': 2}, 'scaling': {'chips': 15, 'mult': 1}},
+    'highCard': {'name': 'High Card', 'baseScore': {'chips': 5, 'mult': 1}, 'scaling': {'chips': 10, 'mult': 1}},
+  }
 
   const hand = req.body.hand;
   let sortedHand = hand.toSorted((a, b) => {return (b.type === 'stone' ? -1 : rankOrder.indexOf(b.rank))
@@ -92,7 +106,7 @@ router.post("/", (req, res) => {
         if(rankOrder.indexOf(sortedHand[i].rank) + 1 === rankOrder.indexOf(prevRank)
           || (jokerMods.hasShortcut && ((rankOrder.indexOf(sortedHand[i].rank) + 2 === rankOrder.indexOf(prevRank))))){
             numInARow += 1;
-            tempStraightKeys[tempStraightKeys.length] = sortedHand[i].key;
+            tempStraightKeys.push(sortedHand[i].key);
             maxInARow = Math.max(numInARow, maxInARow);
             if(tempStraightKeys.length > maxStraightKeys.length)
               maxStraightKeys = tempStraightKeys;
@@ -119,7 +133,7 @@ router.post("/", (req, res) => {
     if((numInARow > 1 && (sortedHand[sortedHand.length - 1].rank === '2' && sortedHand[0].rank === 'Ace')
       || (jokerMods.hasShortcut && sortedHand[sortedHand.length - 1].rank === '3' && sortedHand[0].rank === 'Ace'))){
         numInARow += 1;
-        tempStraightKeys[tempStraightKeys.length] = sortedHand[0].key;
+        tempStraightKeys.push(sortedHand[0].key);
         maxInARow = Math.max(numInARow, maxInARow);
         if(tempStraightKeys.length > maxStraightKeys.length)
           maxStraightKeys = tempStraightKeys;
@@ -132,13 +146,13 @@ router.post("/", (req, res) => {
         handContains.hasFlush = true;
         for(const i in sortedHand){
           if(sortedHand[i].type === 'wild'){
-            handKeys.keysFlush[handKeys.keysFlush.length] = sortedHand[i].key;
+            handKeys.keysFlush.push(sortedHand[i].key);
           } else if(jokerMods.hasSmearedJoker && suit === 'reds' && (sortedHand[i].suit === 'hearts' || sortedHand[i].suit === 'diamonds')){
-            handKeys.keysFlush[handKeys.keysFlush.length] = sortedHand[i].key;
+            handKeys.keysFlush.push(sortedHand[i].key);
           } else if(jokerMods.hasSmearedJoker && suit === 'blacks' && (sortedHand[i].suit === 'spades' || sortedHand[i].suit === 'clubs')){
-            handKeys.keysFlush[handKeys.keysFlush.length] = sortedHand[i].key;
+            handKeys.keysFlush.push(sortedHand[i].key);
           } else if(sortedHand[i].suit === suit){
-            handKeys.keysFlush[handKeys.keysFlush.length] = sortedHand[i].key;
+            handKeys.keysFlush.push(sortedHand[i].key);
           }
         }
       }
@@ -152,7 +166,7 @@ router.post("/", (req, res) => {
         handContains.has5oak = true;
         for(const i in sortedHand){
           if(sortedHand[i].rank === rank){
-            handKeys.keys5oak[handKeys.keys5oak.length] = sortedHand[i].key;
+            handKeys.keys5oak.push(sortedHand[i].key);
           }
         }
       }
@@ -160,7 +174,7 @@ router.post("/", (req, res) => {
         handContains.has4oak = true;
         for(const i in sortedHand){
           if(sortedHand[i].rank === rank){
-            handKeys.keys4oak[handKeys.keys4oak.length] = sortedHand[i].key;
+            handKeys.keys4oak.push(sortedHand[i].key);
           }
         }
       }
@@ -168,7 +182,7 @@ router.post("/", (req, res) => {
         handContains.has3oak = true;
         for(const i in sortedHand){
           if(sortedHand[i].rank === rank){
-            handKeys.keys3oak[handKeys.keys3oak.length] = sortedHand[i].key;
+            handKeys.keys3oak.push(sortedHand[i].key);
           }
         }
       }
@@ -178,49 +192,49 @@ router.post("/", (req, res) => {
           handKeys.keys2Pair = handKeys.keysPair;
           for(const i in sortedHand){
             if(sortedHand[i].rank === rank){
-              handKeys.keys2Pair[handKeys.keys2Pair.length] = sortedHand[i].key;
+              handKeys.keys2Pair.push(sortedHand[i].key);
             }
           }
         } else{
           handContains.hasPair = true;
           for(const i in sortedHand){
             if(sortedHand[i].rank === rank){
-              handKeys.keysPair[handKeys.keysPair.length] = sortedHand[i].key;
+              handKeys.keysPair.push(sortedHand[i].key);
             }
           }
         }
       }
     }
   }
-  const pokerHands = [
-    {'ref': 'flushFive', 'name': 'Flush Five', 'qualifies': handContains.hasFlush && handContains.has5oak, 'scoringKeys': uniq(handKeys.keysFlush.concat(handKeys.keys5oak))},
-    {'ref': 'flushHouse', 'name': 'Flush House', 'qualifies': handContains.hasFlush && handContains.has3oak && handContains.has2Pair, 'scoringKeys': uniq(handKeys.keysFlush.concat(handKeys.keys3oak, handKeys.keys2Pair))},
-    {'ref': 'fiveOfAKind', 'name': 'Five of a Kind', 'qualifies': handContains.has5oak, 'scoringKeys': uniq(handKeys.keys5oak)},
-    {'ref': 'straightFlush', 'name': 'Straight Flush', 'qualifies': handContains.hasStraight && handContains.hasFlush, 'scoringKeys': uniq(handKeys.keysStraight.concat(handKeys.keysFlush))},
-    {'ref': 'fourOfAKind', 'name': 'Four of a Kind', 'qualifies': handContains.has4oak, 'scoringKeys': uniq(handKeys.keys4oak)},
-    {'ref': 'fullHouse', 'name': 'Full House', 'qualifies': handContains.has3oak && handContains.has2Pair, 'scoringKeys': uniq(handKeys.keys3oak.concat(handKeys.keys2Pair))},
-    {'ref': 'flush', 'name': 'Flush', 'qualifies': handContains.hasFlush, 'scoringKeys': uniq(handKeys.keysFlush)},
-    {'ref': 'straight', 'name': 'Straight', 'qualifies': handContains.hasStraight, 'scoringKeys': uniq(handKeys.keysStraight)},
-    {'ref': 'threeOfAKind', 'name': 'Three of a Kind', 'qualifies': handContains.has3oak, 'scoringKeys': uniq(handKeys.keys3oak)},
-    {'ref': 'twoPair', 'name': 'Two Pair', 'qualifies': handContains.has2Pair, 'scoringKeys': uniq(handKeys.keys2Pair)},
-    {'ref': 'pair', 'name': 'Pair', 'qualifies': handContains.hasPair, 'scoringKeys': uniq(handKeys.keysPair)},
-    {'ref': 'highCard', 'name': 'High Card', 'qualifies': true, 'scoringKeys': handKeys.keyHighCard},
+  const playedHand = [
+    {'ref': 'flushFive', 'qualifies': handContains.hasFlush && handContains.has5oak, 'scoringKeys': uniq(handKeys.keysFlush.concat(handKeys.keys5oak))},
+    {'ref': 'flushHouse', 'qualifies': handContains.hasFlush && handContains.has3oak && handContains.has2Pair, 'scoringKeys': uniq(handKeys.keysFlush.concat(handKeys.keys3oak, handKeys.keys2Pair))},
+    {'ref': 'fiveOfAKind', 'qualifies': handContains.has5oak, 'scoringKeys': uniq(handKeys.keys5oak)},
+    {'ref': 'straightFlush', 'qualifies': handContains.hasStraight && handContains.hasFlush, 'scoringKeys': uniq(handKeys.keysStraight.concat(handKeys.keysFlush))},
+    {'ref': 'fourOfAKind', 'qualifies': handContains.has4oak, 'scoringKeys': uniq(handKeys.keys4oak)},
+    {'ref': 'fullHouse', 'qualifies': handContains.has3oak && handContains.has2Pair, 'scoringKeys': uniq(handKeys.keys3oak.concat(handKeys.keys2Pair))},
+    {'ref': 'flush', 'qualifies': handContains.hasFlush, 'scoringKeys': uniq(handKeys.keysFlush)},
+    {'ref': 'straight', 'qualifies': handContains.hasStraight, 'scoringKeys': uniq(handKeys.keysStraight)},
+    {'ref': 'threeOfAKind', 'qualifies': handContains.has3oak, 'scoringKeys': uniq(handKeys.keys3oak)},
+    {'ref': 'twoPair', 'qualifies': handContains.has2Pair, 'scoringKeys': uniq(handKeys.keys2Pair)},
+    {'ref': 'pair', 'qualifies': handContains.hasPair, 'scoringKeys': uniq(handKeys.keysPair)},
+    {'ref': 'highCard', 'qualifies': true, 'scoringKeys': handKeys.keyHighCard},
   ]
-  const scoringKeys = [];
+  let scoringKeys = [];
   let handName;
-  for (let handType of pokerHands){
+  for (let handType of playedHand){
     if (handType.qualifies){
-      handName = handType.name;
+      handName = pokerHands[handType.ref].name;
       scoringKeys = handType.scoringKeys;
       break;
     }
   }
   for (let i in hand){
-    if(hand[i].type === 'stone');
-    scoringKeys[scoringKeys.length] = hand[i].key;
+    if(hand[i].type === 'stone')
+      scoringKeys.push(hand[i].key);
   }
-  console.log(handContains);
-  res.send();
+  let scoringCards = hand.filter((card) => scoringKeys.includes(card.key));
+  res.json({'scoredHand': handName, 'scoringCardsDebug': scoringCards});
 });
 
 module.exports = router;
