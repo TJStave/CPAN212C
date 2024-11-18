@@ -14,7 +14,7 @@ const JokerContainer = ({rootRef, jokers}) => {
   }
 
   const createJoker = (joker) => {
-    jokers[jokers.length] = joker;
+    jokers.push(joker);
     setSortTrigger({...sortTrigger});
   }
 

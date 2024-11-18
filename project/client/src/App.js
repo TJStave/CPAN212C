@@ -42,9 +42,9 @@ function App() {
     const unSelectedCards = [];
     for(const i in cards){
       if (cards[i].selected)
-        selectedCards[selectedCards.length] = cards[i];
+        selectedCards.push(cards[i]);
       else
-        unSelectedCards[unSelectedCards.length] = cards[i];
+        unSelectedCards.push(cards[i]);
     }
     const response = await fetch('http://localhost:8000/score', {
         method: 'POST',

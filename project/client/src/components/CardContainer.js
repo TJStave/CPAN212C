@@ -48,7 +48,7 @@ const CardContainer = ({rootRef, cards}) => {
   }
 
   const createCard = (card) => {
-    cards[cards.length] = card;
+    cards.push(card);
     setSortTrigger({...sortTrigger});
   }
 
