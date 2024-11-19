@@ -45,6 +45,7 @@ router.post('/joker', async (req, res) => {
   if(req.body.joker == 'weeJoker'){
     ctx.scale(0.5, 0.5);
   }
+
   let jokerImg = await loadImage('./assets/jokers/' + req.body.joker + '.png');
   ctx.drawImage(jokerImg, 0, 0);
   if(req.body.lifespan){
@@ -55,12 +56,7 @@ router.post('/joker', async (req, res) => {
     let debuffImg = await loadImage('./assets/jokerStickers/' + req.body.debuff + 'Sticker.png');
     ctx.drawImage(debuffImg, 0, 0);
   }
-  let exists;
-  fs.access('./jokerCode/' + req.body.joker + '.js', fs.constants.F_OK, (err) => {
-    if(!err)
-      exists = true;
-  })
-  if(!exists){
+  if(!fs.existsSync('./jokerCode/' + req.body.joker + '.js')){
     let noImpImg = await loadImage('./assets/noImplementation.png');
     ctx.drawImage(noImpImg, 0, 0);
   }

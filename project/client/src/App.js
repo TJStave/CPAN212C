@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { Button } from 'react-bootstrap';
 import './App.css';
 import CardContainer from './components/CardContainer';
@@ -28,7 +28,8 @@ function App() {
   const jokers = testJokers;
   const cards = testCards;
   const statusState = {'hands': 4, 'discards': 3, 'money': 4};
-  const scoreResults = {'handSetter': () => {return undefined}, 'scoreSetter': () => {return undefined}};
+  const scoreResults = {'handSetter': () => {return undefined}, 'scoreSetter': () => {return undefined},
+                        'chipsSetter': () => {return undefined}, 'multSetter': () => {return undefined}};
   /*
   This ref is part of a hacky workaround that is only necessary 
   because of how browsers treat overflow when it has different values on x and y
@@ -46,13 +47,19 @@ function App() {
       else
         unSelectedCards.push(cards[i]);
     }
+    if(selectedCards.length < 1){
+      return;
+    }
     const response = await fetch('http://localhost:8000/score', {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({'jokers': jokers, 'hand': selectedCards, 'cards': unSelectedCards, 'state': statusState})
+        body: JSON.stringify({'jokers': jokers, 'hand': selectedCards, 'cards': unSelectedCards, 'resources': statusState})
       });
     let json = await response.json();
     scoreResults.handSetter(json.scoredHand);
+    scoreResults.scoreSetter(json.score);
+    scoreResults.chipsSetter(json.scoreComp.chips);
+    scoreResults.multSetter(json.scoreComp.mult);
     console.log(json.scoringCardsDebug);
   }
 

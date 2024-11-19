@@ -6,10 +6,14 @@ const StatusBar = ({state, results}) => {
   const [discards, setDiscards] = useState(3);
   const [money, setMoney] = useState(4);
   const [score, setScore] = useState(0);
+  const [chips, setChips] = useState(0);
+  const [mult, setMult] = useState(0);
   const [handType, setHandType] = useState('High Card');
 
   results.scoreSetter = setScore;
   results.handSetter = setHandType;
+  results.chipsSetter = setChips;
+  results.multSetter = setMult;
 
   useEffect(() => {
     state.hands = hands;
@@ -30,6 +34,7 @@ const StatusBar = ({state, results}) => {
         <Card.Header>Score</Card.Header>
         <Card.Body>
           <Card.Text>{score}</Card.Text>
+          <Card.Text>{chips} X {mult}</Card.Text>
           <Card.Text>{handType}</Card.Text>
         </Card.Body>
         <Card.Header>Hands</Card.Header>
