@@ -25,6 +25,7 @@ const Joker = ({index, data, move, remove, rootRef, scrollRef}) => {
   const [isLoading, setLoading] = useState(true);
   const [isHover, setHover] = useState(false);
   const [isEditing, setEditing] = useState(false);
+  const [isInfoing, setInfoing] = useState(false);
   const [fetchTrigger, setFetchTrigger] = useState(false);
 
   const centerElement = (parentRef, childRef, grandRef, elderRef) => {
@@ -120,6 +121,7 @@ const Joker = ({index, data, move, remove, rootRef, scrollRef}) => {
       onMouseLeave={() => {
         setHover(false);
         setEditing(false);
+        setInfoing(false);
         if(!whichJoker)
           setWhichJoker(data.joker);
       }}
@@ -128,13 +130,17 @@ const Joker = ({index, data, move, remove, rootRef, scrollRef}) => {
         {isHover && createPortal(
           <Card ref={infoRef} bg='primary' text='light'
             style={{width: '180px', position: 'absolute', left: infoLeft, top: infoTop}}>
-            {!isEditing ? (
+            {!isEditing && !isInfoing ? (
               <>
                 <Card.Header>{jokerName}</Card.Header>
-                <Button onClick={() => {setEditing(true); setInfoTop(currentValue => currentValue)}}>Edit Card</Button>
-                <Button onClick={() => move(index, -1)}>&lt;--</Button><Button onClick={() => move(index, 1)}>--&gt;</Button>
+                <Button onClick={() => {setEditing(true); setInfoTop(currentValue => currentValue)}}>Edit Joker</Button>
+                <Button onClick={() => {setInfoing(true); setInfoTop(currentValue => currentValue)}}>View Info</Button>
+                <div style={{flexDirection: 'row', width: '100%'}}>
+                  <Button style={{width: '50%'}} onClick={() => move(index, -1)}>&lt;--</Button>
+                  <Button style={{width: '50%'}} onClick={() => move(index, 1)}>--&gt;</Button>
+                </div>
               </>
-            ) : (
+            ) : (isEditing ? ( 
               <Card.Body>
                 <Select
                   options={jokerOptions}
@@ -171,7 +177,13 @@ const Joker = ({index, data, move, remove, rootRef, scrollRef}) => {
                 />
                 <Button variant='danger' onClick={() => remove(index)}>Delete Joker</Button>
               </Card.Body>
-            )
+            ) : (
+              <Card.Body>
+                <Card.Text>{jokerDesc}</Card.Text>
+                <Card.Text>{jokerRarity}</Card.Text>
+                <Card.Text>Sell Value: ${Math.max(1, Math.floor(jokerValue / 2))}</Card.Text>
+              </Card.Body>
+            ))
             }
           </Card>, rootRef.current
         )}

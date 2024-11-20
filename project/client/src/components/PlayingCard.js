@@ -131,8 +131,11 @@ const PlayingCard = ({index, data, cardsSelected: [numSelected, setNumSelected],
                     {cardRank} of {cardSuit.charAt(0).toUpperCase() + cardSuit.slice(1)}
                   </Card.Header>
                 )}
-                <Button onClick={() => {setEditing(true); setInfoTop(currentValue => currentValue - 80)}}>Edit Card</Button>
-                <Button onClick={() => move(index, -1)}>&lt;--</Button><Button onClick={() => move(index, 1)}>--&gt;</Button>
+                <Button onClick={() => {setEditing(true); setInfoTop(currentValue => currentValue - 60)}}>Edit Card</Button>
+                <div style={{flexDirection: 'row', width: '100%'}}>
+                  <Button style={{width: '50%'}} onClick={() => move(index, -1)}>&lt;--</Button>
+                  <Button style={{width: '50%'}} onClick={() => move(index, 1)}>--&gt;</Button>
+                </div>
               </>
             ) : (
               <Card.Body>

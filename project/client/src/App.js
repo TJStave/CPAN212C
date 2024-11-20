@@ -6,30 +6,30 @@ import JokerContainer from './components/JokerContainer';
 import StatusBar from './components/StatusBar';
 
 function App() {
-  const testJokers = [
-    {'joker': 'halfJoker', 'lifespan': 'perishable', 'key': crypto.randomUUID()},
-    {'joker': 'steelJoker', 'lifespan': 'eternal', 'key': crypto.randomUUID()},
-    {'joker': 'weeJoker', 'lifespan': 'eternal', 'debuff': 'rental', 'key': crypto.randomUUID()},
-    {'joker': 'photograph', 'debuff': 'rental', 'key': crypto.randomUUID()},
-    {'joker': 'squareJoker', 'key': crypto.randomUUID()}
-  ];
+  // const testJokers = [
+  //   {'joker': 'halfJoker', 'lifespan': 'perishable', 'key': crypto.randomUUID()},
+  //   {'joker': 'steelJoker', 'lifespan': 'eternal', 'key': crypto.randomUUID()},
+  //   {'joker': 'weeJoker', 'lifespan': 'eternal', 'debuff': 'rental', 'key': crypto.randomUUID()},
+  //   {'joker': 'photograph', 'debuff': 'rental', 'key': crypto.randomUUID()},
+  //   {'joker': 'squareJoker', 'key': crypto.randomUUID()}
+  // ];
   const testCards = [
-    {'type': 'stone', 'seal': 'gold', 'key': crypto.randomUUID()},
+    {'type': 'stone', 'key': crypto.randomUUID()},
     {'suit': 'diamonds', 'rank': 'Jack', 'type': 'gold', 'seal': 'blue', 'key': crypto.randomUUID()},
-    {'suit': 'spades', 'rank': 'Ace', 'type': 'lucky', 'key': crypto.randomUUID()},
-    {'suit': 'hearts', 'rank': '6', 'type': 'steel', 'seal': 'red', 'key': crypto.randomUUID()},
-    {'suit': 'clubs', 'rank': 'Queen', 'type': 'glass', 'key': crypto.randomUUID()},
+    {'suit': 'spades', 'rank': 'Ace', 'key': crypto.randomUUID()},
+    {'suit': 'hearts', 'rank': '6', 'key': crypto.randomUUID()},
+    {'suit': 'clubs', 'rank': 'Queen', 'key': crypto.randomUUID()},
     {'suit': 'hearts', 'rank': '9', 'seal': 'purple', 'key': crypto.randomUUID()},
-    {'suit': 'clubs', 'rank': 'King', 'type': 'mult', 'key': crypto.randomUUID()},
+    {'suit': 'clubs', 'rank': 'King', 'key': crypto.randomUUID()},
     {'suit': 'diamonds', 'rank': '2', 'type': 'wild', 'key': crypto.randomUUID()},
-    {'suit': 'spades', 'rank': '10', 'type': 'bonus', 'key': crypto.randomUUID()}
+    {'suit': 'spades', 'rank': '10', 'key': crypto.randomUUID()}
   ];
 
-  const jokers = testJokers;
+  const jokers = [];
   const cards = testCards;
   const statusState = {'hands': 4, 'discards': 3, 'money': 4};
   const scoreResults = {'handSetter': () => {return undefined}, 'scoreSetter': () => {return undefined},
-                        'chipsSetter': () => {return undefined}, 'multSetter': () => {return undefined}};
+    'chipsSetter': () => {return undefined}, 'multSetter': () => {return undefined}};
   /*
   This ref is part of a hacky workaround that is only necessary 
   because of how browsers treat overflow when it has different values on x and y

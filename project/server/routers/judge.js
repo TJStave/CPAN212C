@@ -302,6 +302,7 @@ router.post("/", (req, res) => {
   const boardState = {
     'jokers': jokers,
     'jokerMods': jokerMods,
+    'originHand': hand,
     'scoringCards': scoringCards,
     'cardsHeld': cards,
     'resources': resources,
@@ -317,7 +318,8 @@ router.post("/", (req, res) => {
     }
   }
   for (let card of scoringCards){
-    rankFunctions[card.rank](card)
+    if (card.type !== 'stone')
+      rankFunctions[card.rank](card)
     scoredCardTypes[card.type](card)
     if(card.seal)
       scoredSeals[card.seal](card)
@@ -329,21 +331,27 @@ router.post("/", (req, res) => {
   }
 
   for (let card of scoringCards){
-    for (action of card.onScoreOther)
-      action(boardState);
-    for (action of card.onScoreAdd)
-      action(scoring)
-    for (action of card.onScoreMult)
-      action(scoring)
+    while (card.numTriggers >= 1){
+      for (action of card.onScoreOther)
+        action(boardState);
+      for (action of card.onScoreAdd)
+        action(scoring);
+      for (action of card.onScoreMult)
+        action(scoring);
+      card.numTriggers -= 1;
+    }
   }
 
   for (let card of cards){
-    for (action of card.onScoreOther)
-      action(boardState);
-    for (action of card.onScoreAdd)
-      action(scoring)
-    for (action of card.onScoreMult)
-      action(scoring)
+    while (card.numTriggers >= 1){
+      for (action of card.onScoreOther)
+        action(boardState);
+      for (action of card.onScoreAdd)
+        action(scoring);
+      for (action of card.onScoreMult)
+        action(scoring);
+      card.numTriggers -= 1;
+    }
   }
 
   //score jokers
