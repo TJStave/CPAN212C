@@ -28,12 +28,8 @@ const scoredCardTypes = {
   'stone': card => card.onScoreAdd.push((scoring) => scoring.chips += 50),
   'gold': nothingBurger,
   'lucky': card => {
-    rand1 = Math.random() * 5;
-    rand2 = Math.random() * 15;
-    if (rand1 <= 1)
-      card.onScoreAdd.push((scoring) => scoring.mult += 20);
-    if (rand2 <= 1)
-      card.onScoreOther.push((boardState) => boardState.resources.money += 20);
+    card.onScoreAdd.push((scoring) => {if(Math.random() * 5 <= 1){scoring.mult += 20}});
+    card.onScoreOther.push((boardState) => {if(Math.random() * 15 <= 1){boardState.resources.money += 20}});
   }
 };
 

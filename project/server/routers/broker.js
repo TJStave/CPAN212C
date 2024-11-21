@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const Joker = require('../schemas/joker')
+const Joker = require('../schemas/joker');
 
 router.post('/', (req, res) => {
-  Joker.find({ref: req.body.joker})
+  Joker.findOne({ref: req.body.joker})
     .then((joker) => {
-      res.json(joker[0]);
+      res.json(joker);
     })
     .catch((err) => {
       res.status(500).send(err);
