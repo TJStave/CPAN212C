@@ -29,6 +29,8 @@ router.post("/", (req, res) => {
     'hasSplash': false, //Splash makes all played cards score, instead of just cards that make up the hand type
     'hasPareidolia': false //Pareidolia makes all cards count as face cards
   }
+  //This exists purely for oops all sixes
+  let chanceMult = 1;
   //counts the number of cards that are part of each suit, mainly used for detecting flushes, but some jokers use it
   const numSuits = {
     'wilds': 0,
@@ -308,19 +310,27 @@ router.post("/", (req, res) => {
     'resources': resources,
     'handContains': handContains,
     'numSuits': numSuits,
-    'numRanks': numRanks
+    'numRanks': numRanks,
+    'chanceMult': chanceMult
   }
-  
+  //this is purely here for oops all 6s
+  for (let joker of jokers){
+    if (joker.code && joker.code.chanceTime instanceof Function){
+      joker.code.chanceTime(boardState);
+    }
+  }
+
   //go through jokers and run setup code if they have any
   for (let joker of jokers){
     if (joker.code && joker.code.setupScoring instanceof Function){
       joker.code.setupScoring(joker, boardState);
     }
   }
+  //setup code for playing cards
   for (let card of scoringCards){
     if (card.type !== 'stone')
       rankFunctions[card.rank](card)
-    scoredCardTypes[card.type](card)
+    scoredCardTypes[card.type](card, boardState)
     if(card.seal)
       scoredSeals[card.seal](card)
   }

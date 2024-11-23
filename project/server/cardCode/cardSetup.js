@@ -27,9 +27,9 @@ const scoredCardTypes = {
   'steel': nothingBurger,
   'stone': card => card.onScoreAdd.push((scoring) => scoring.chips += 50),
   'gold': nothingBurger,
-  'lucky': card => {
-    card.onScoreAdd.push((scoring) => {if(Math.random() * 5 <= 1){scoring.mult += 20}});
-    card.onScoreOther.push((boardState) => {if(Math.random() * 15 <= 1){boardState.resources.money += 20}});
+  'lucky': (card, boardState) => {
+    card.onScoreAdd.push((scoring) => {if(Math.random() * 5 <= boardState.chanceMult){scoring.mult += 20}});
+    card.onScoreOther.push((boardState) => {if(Math.random() * 15 <=  boardState.chanceMult){boardState.resources.money += 20}});
   }
 };
 
