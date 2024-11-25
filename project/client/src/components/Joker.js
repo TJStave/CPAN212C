@@ -3,7 +3,6 @@ import { Spinner, Card, Button } from 'react-bootstrap';
 import { createPortal } from 'react-dom';
 import Select from 'react-dropdown-select';
 import { jokerOptions, lifespanOptions, debuffOptions } from './optionArrays';
-import fetch from 'node-fetch';
 
 const SERVPORT = process.env.REACT_APP_SERVPORT || 8000;
 const SERVHOST = process.env.REACT_APP_SERVHOST || 'http://localhost';
