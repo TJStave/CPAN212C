@@ -1,12 +1,4 @@
 {
-    "headers": [
-        {
-            "source": "/api/(.*)",
-            "headers": [
-                { "key": "Access-Control-Allow-Origin", "value": "*" }
-            ]
-        }
-    ],
     "builds": [
         {
             "src": "./app.js",
@@ -16,7 +8,10 @@
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "/app.js"
+            "dest": "/app.js",
+            "headers": [
+                { "key": "Access-Control-Allow-Origin", "value": "*" }
+            ]
         }
     ]
 }
