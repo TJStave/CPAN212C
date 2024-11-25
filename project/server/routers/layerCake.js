@@ -12,17 +12,17 @@ router.post('/card', async (req, res) => {
   let canvas = createCanvas(142, 190);
   let ctx = canvas.getContext('2d');
   if(req.body.type != 'stone'){
-    let typeImg = await loadImage('./assets/cardBacks/' + req.body.type + 'Card.png');
+    let typeImg = await loadImage(path.join(__dirname, '../assets/cardBacks/' + req.body.type + 'Card.png'));
     ctx.drawImage(typeImg, 0, 0);
   }
-  let faceImg = await loadImage('./assets/cardFaces/' + req.body.suit + req.body.rank + '.png');
+  let faceImg = await loadImage(path.join(__dirname, '../assets/cardFaces/' + req.body.suit + req.body.rank + '.png'));
   ctx.drawImage(faceImg, 0, 0);
   if(req.body.type == 'stone'){
-    let typeImg = await loadImage('./assets/cardBacks/' + req.body.type + 'Card.png');
+    let typeImg = await loadImage(path.join(__dirname, '../assets/cardBacks/' + req.body.type + 'Card.png'));
     ctx.drawImage(typeImg, 0, 0);
   }
   if(req.body.seal){
-    let sealImg = await loadImage('./assets/cardSeals/' + req.body.seal + 'Seal.png');
+    let sealImg = await loadImage(path.join(__dirname, '../assets/cardSeals/' + req.body.seal + 'Seal.png'));
     ctx.drawImage(sealImg, 0, 0);
   }
   res.send(canvas.toDataURL());
@@ -46,18 +46,18 @@ router.post('/joker', async (req, res) => {
     ctx.scale(0.5, 0.5);
   }
 
-  let jokerImg = await loadImage('./assets/jokers/' + req.body.joker + '.png');
+  let jokerImg = await loadImage(path.join(__dirname, '../assets/jokers/' + req.body.joker + '.png'));
   ctx.drawImage(jokerImg, 0, 0);
   if(req.body.lifespan){
-    let lifespanImg = await loadImage('./assets/jokerStickers/' + req.body.lifespan + 'Sticker.png');
+    let lifespanImg = await loadImage(path.join(__dirname, '../assets/jokerStickers/' + req.body.lifespan + 'Sticker.png'));
     ctx.drawImage(lifespanImg, 0, 0);
   }
   if(req.body.debuff){
-    let debuffImg = await loadImage('./assets/jokerStickers/' + req.body.debuff + 'Sticker.png');
+    let debuffImg = await loadImage(path.join(__dirname, '../assets/jokerStickers/' + req.body.debuff + 'Sticker.png'));
     ctx.drawImage(debuffImg, 0, 0);
   }
-  if(!fs.existsSync('./jokerCode/' + req.body.joker + '.js')){
-    let noImpImg = await loadImage('./assets/noImplementation.png');
+  if(!fs.existsSync(path.join(__dirname, '../jokerCode/' + req.body.joker + '.js'))){
+    let noImpImg = await loadImage(path.join(__dirname, '../assets/noImplementation.png'));
     ctx.drawImage(noImpImg, 0, 0);
   }
   res.send(canvas.toDataURL());
