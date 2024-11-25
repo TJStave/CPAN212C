@@ -4,8 +4,7 @@ import { createPortal } from 'react-dom';
 import Select from 'react-dropdown-select';
 import { jokerOptions, lifespanOptions, debuffOptions } from './optionArrays';
 
-const SERVPORT = process.env.REACT_APP_SERVPORT || 8000;
-const SERVHOST = process.env.REACT_APP_SERVHOST || 'http://localhost';
+const SERVHOST = process.env.REACT_APP_SERVHOST || 'http://localhost:8000';
 
 const AddJoker = ({add, rootRef, scrollRef}) => {
   const thisRef = useRef(null);
@@ -58,7 +57,7 @@ const AddJoker = ({add, rootRef, scrollRef}) => {
 
   useEffect(() => {
     const fetchCard = async () => {
-      const response = await fetch(`${SERVHOST}:${SERVPORT}/build/newCard`);
+      const response = await fetch(`${SERVHOST}/build/newCard`);
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       setJokerImg(url);

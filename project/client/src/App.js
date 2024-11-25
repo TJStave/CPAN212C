@@ -5,8 +5,7 @@ import CardContainer from './components/CardContainer';
 import JokerContainer from './components/JokerContainer';
 import StatusBar from './components/StatusBar';
 
-const SERVPORT = process.env.REACT_APP_SERVPORT || 8000;
-const SERVHOST = process.env.REACT_APP_SERVHOST || 'http://localhost';
+const SERVHOST = process.env.REACT_APP_SERVHOST || 'http://localhost:8000';
 
 function App() {
   // const testJokers = [
@@ -53,7 +52,7 @@ function App() {
     if(selectedCards.length < 1){
       return;
     }
-    const response = await fetch(`${SERVHOST}:${SERVPORT}/score`, {
+    const response = await fetch(`${SERVHOST}/score`, {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({'jokers': jokers, 'hand': selectedCards, 'cards': unSelectedCards, 'resources': statusState})
