@@ -4,6 +4,7 @@ import './App.css';
 import CardContainer from './components/CardContainer';
 import JokerContainer from './components/JokerContainer';
 import StatusBar from './components/StatusBar';
+import fetch from 'node-fetch';
 
 const SERVPORT = process.env.REACT_APP_SERVPORT || 8000;
 const SERVHOST = process.env.REACT_APP_SERVHOST || 'http://localhost';
