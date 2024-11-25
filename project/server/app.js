@@ -6,7 +6,7 @@ const app = express();
 const cors = require("cors");
 
 const main = async () => {
-  await mongoose.connect('mongodb+srv://n01286513:' + process.env.PASSWORD + '@cluster0.pmfh9.mongodb.net/balatro?retryWrites=true&w=majority&appName=Cluster0')
+  await mongoose.connect(`mongodb+srv://n01286513:${process.env.PASSWORD}@cluster0.pmfh9.mongodb.net/balatro?retryWrites=true&w=majority&appName=Cluster0`)
 }
 
 main().catch(err => console.log(err));
@@ -28,7 +28,7 @@ app.get("/", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`http://localhost:${PORT}`);
+  console.log(`listening on port ${PORT}`);
 });
 
 app.use("", (req, res) => {

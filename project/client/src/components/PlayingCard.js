@@ -4,6 +4,9 @@ import { createPortal } from 'react-dom';
 import Select from 'react-dropdown-select';
 import { suitOptions, rankOptions, typeOptions, sealOptions } from './optionArrays';
 
+const SERVPORT = process.env.REACT_APP_SERVPORT || 8000;
+const SERVHOST = process.env.REACT_APP_SERVHOST || 'http://localhost';
+
 const PlayingCard = ({index, data, cardsSelected: [numSelected, setNumSelected], move, remove, rootRef, scrollRef}) => {
   if(!Object.hasOwn(data, 'suit')){
     data.suit = 'spades';
@@ -96,7 +99,7 @@ const PlayingCard = ({index, data, cardsSelected: [numSelected, setNumSelected],
 
   useEffect(() => {
     const fetchCard = async () => {
-      const response = await fetch('http://localhost:8000/build/card', {
+      const response = await fetch(`${SERVHOST}:${SERVPORT}/build/card`, {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)

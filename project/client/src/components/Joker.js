@@ -4,6 +4,9 @@ import { createPortal } from 'react-dom';
 import Select from 'react-dropdown-select';
 import { jokerOptions, lifespanOptions, debuffOptions } from './optionArrays';
 
+const SERVPORT = process.env.REACT_APP_SERVPORT || 8000;
+const SERVHOST = process.env.REACT_APP_SERVHOST || 'http://localhost';
+
 const Joker = ({index, data, move, remove, rootRef, scrollRef}) => {
   if(!Object.hasOwn(data, 'joker')){
     data.joker = 'jimbo';
@@ -80,7 +83,7 @@ const Joker = ({index, data, move, remove, rootRef, scrollRef}) => {
 
   useEffect(() => {
     const fetchJokerImg = async () => {
-      let response = await fetch('http://localhost:8000/build/joker', {
+      let response = await fetch(`${SERVHOST}:${SERVPORT}/build/joker`, {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
@@ -90,7 +93,7 @@ const Joker = ({index, data, move, remove, rootRef, scrollRef}) => {
       setLoading(false);
     }
     const fetchJokerInfo = async () => {
-      let response = await fetch('http://localhost:8000/query', {
+      let response = await fetch(`${SERVHOST}:${SERVPORT}/query`, {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({'joker': data.joker})
