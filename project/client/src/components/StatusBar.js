@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Card } from "react-bootstrap";
+import { Card, Button } from "react-bootstrap";
 
-const StatusBar = ({state, results}) => {
+const StatusBar = ({state, results, scoreButton, saveButton, loadButton}) => {
   const [hands, setHands] = useState(4);
   const [discards, setDiscards] = useState(3);
   const [money, setMoney] = useState(4);
@@ -9,11 +9,13 @@ const StatusBar = ({state, results}) => {
   const [chips, setChips] = useState(0);
   const [mult, setMult] = useState(0);
   const [handType, setHandType] = useState('High Card');
+  const [saveDisabled, setSaveDisabled] = useState(true);
 
   results.scoreSetter = setScore;
   results.handSetter = setHandType;
   results.chipsSetter = setChips;
   results.multSetter = setMult;
+  results.disableSave = setSaveDisabled;
 
   useEffect(() => {
     state.hands = hands;
@@ -67,6 +69,9 @@ const StatusBar = ({state, results}) => {
             onChange={e => setMoney(e.target.value)}
           />
         </Card.Body>
+        <Button onClick={scoreButton}>Score</Button>
+        <Button onClick={saveButton} disabled={saveDisabled}>Save Last Hand</Button>
+        <Button onClick={loadButton}>Load Hand</Button>
       </Card>
     </div>
   )

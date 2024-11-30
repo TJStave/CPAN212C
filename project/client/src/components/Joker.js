@@ -92,7 +92,7 @@ const Joker = ({index, data, move, remove, rootRef, scrollRef}) => {
       setLoading(false);
     }
     const fetchJokerInfo = async () => {
-      let response = await fetch(`${SERVHOST}/query`, {
+      let response = await fetch(`${SERVHOST}/query/getJoker`, {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({'joker': data.joker})

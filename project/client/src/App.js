@@ -1,9 +1,9 @@
 import { useRef } from 'react';
-import { Button } from 'react-bootstrap';
 import './App.css';
 import CardContainer from './components/CardContainer';
 import JokerContainer from './components/JokerContainer';
 import StatusBar from './components/StatusBar';
+import SaveState from './components/SaveState';
 
 const SERVHOST = process.env.REACT_APP_SERVHOST || 'http://localhost:8000';
 
@@ -26,12 +26,14 @@ function App() {
     {'suit': 'diamonds', 'rank': '2', 'type': 'wild', 'key': crypto.randomUUID()},
     {'suit': 'spades', 'rank': '10', 'key': crypto.randomUUID()}
   ];
-
+  //variables for various things
   const jokers = [];
   const cards = testCards;
   const statusState = {'hands': 4, 'discards': 3, 'money': 4};
   const scoreResults = {'handSetter': () => {return undefined}, 'scoreSetter': () => {return undefined},
-    'chipsSetter': () => {return undefined}, 'multSetter': () => {return undefined}};
+    'chipsSetter': () => {return undefined}, 'multSetter': () => {return undefined}, 'disableSave': () => {return undefined}};
+  const modalShowers = {'showSave': () => {return undefined}, 'showLoad': () => {return undefined}};
+  let lastHand = null;
   /*
   This ref is part of a hacky workaround that is only necessary 
   because of how browsers treat overflow when it has different values on x and y
@@ -62,19 +64,32 @@ function App() {
     scoreResults.scoreSetter(json.score);
     scoreResults.chipsSetter(json.scoreComp.chips);
     scoreResults.multSetter(json.scoreComp.mult);
-    console.log(json.scoringCardsDebug);
+    scoreResults.disableSave(false);
+    lastHand = {
+      'score': {'handType': json.scoredHand, 'total': json.score, 'chips': json.scoreComp.chips, 'mult': json.scoreComp.mult},
+      'statusState': {'hands': statusState.hands, 'discards': statusState.discards, 'money': statusState.money},
+      'jokers': jokers, 'playedCards': selectedCards, 'heldCards': unSelectedCards
+    }
+  }
+
+  const saveLastHand = async (savedName) => {
+    await fetch(`${SERVHOST}/query/savedHands`, {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({'savedName': savedName, ...lastHand})
+      });
   }
 
   return (
     <div className="App" ref={appRef} style={{flex: 1, flexDirection: 'row', alignItems: 'stretch'}}>
       <div style={{display: 'flex', width: '20vw', flexDirection: 'column', justifyContent: 'center'}}>
-        <StatusBar state={statusState} results={scoreResults}/>
-        <Button onClick={calcScore}>Score</Button>
+        <StatusBar state={statusState} results={scoreResults} scoreButton={calcScore} saveButton={() => modalShowers.showSave(true)} loadButton={modalShowers.showLoad}/>
       </div>
       <div style={{display: 'flex', width: '80vw', flexDirection: 'column', justifyContent: 'space-between'}}>
         <JokerContainer rootRef={appRef} jokers={jokers}/>
         <CardContainer rootRef={appRef} cards={cards}/>
       </div>
+      <SaveState showTriggers={modalShowers} saveFunc={saveLastHand}/>
     </div>
   );
 }
